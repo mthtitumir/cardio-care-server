@@ -29,9 +29,19 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         const problemCollection = client.db('cardioCare').collection('cardioProblems');
+        const appointmentCollection = client.db('cardioCare').collection('appointments');
+
         app.get('/problems', async(req, res) =>{
             const cursor = problemCollection.find();
             const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        // appointments data
+        app.post('/appointments', async(req, res)=>{
+            const appointment = req.body;
+            console.log(appointment);
+            const result = await appointmentCollection.insertOne(appointment);
             res.send(result);
         })
         // Send a ping to confirm a successful connection
