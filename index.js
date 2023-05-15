@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
         const problemCollection = client.db('cardioCare').collection('cardioProblems');
         const appointmentCollection = client.db('cardioCare').collection('appointments');
 
@@ -42,6 +42,12 @@ async function run() {
             const appointment = req.body;
             console.log(appointment);
             const result = await appointmentCollection.insertOne(appointment);
+            res.send(result);
+        })
+
+        app.get('/appointments', async(req, res) =>{
+            const cursor = appointmentCollection.find();
+            const result = await cursor.toArray();
             res.send(result);
         })
         // Send a ping to confirm a successful connection
