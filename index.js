@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 4500;
@@ -30,7 +30,57 @@ async function run() {
         // await client.connect();
         const problemCollection = client.db('cardioCare').collection('cardioProblems');
         const appointmentCollection = client.db('cardioCare').collection('appointments');
+        const doctorCollection = client.db('cardioCare').collection('doctors');
+        // doctors data
+        app.post('/doctors', async(req, res)=>{
+            const doctor = req.body;
+            console.log(doctor);
+            const result = await doctorCollection.insertOne(doctor);
+            res.send(result);
+        })
+        app.get('/doctors', async(req, res)=>{
+            const cursor = doctorCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+        app.delete('/doctors/delete/:id', async(req, res)=>{
+            const result = await doctorCollection.deleteOne({_id : new ObjectId (req.params.id)});
+            res.send(result);
+        })
+        app.get('/doctors/:id', async(req, res)=>{
+            const result = await doctorCollection.findOne({_id: new ObjectId(req.params.id)})
+            res.send(result);
+        })
+        app.put('/doctors/update-doctor/:id', async(req, res)=>{
+            const id = req.params.id;
+            const body = req.body;
+            const option = {
+                upsert: true,
+            }
+            const query = {_id : new ObjectId(id)};
+            const doctorData = {
+                $set: {
+                    name: body.name,
+                    email: body.email,
+                    phone: body.phone,
+                    docId: body.docId,
+                    photoUrl: body.photoUrl,
+                    speciality: body.speciality,
+                    location: body.location,
+                    linkedIn: body.linkedIn,
+                }
+            }
+            const result = await doctorCollection.updateOne(
+                query, 
+                doctorData, 
+                option
+                )
+            res.send(result);
 
+
+        })
+
+        // problems data
         app.get('/problems', async(req, res) =>{
             const cursor = problemCollection.find();
             const result = await cursor.toArray();
