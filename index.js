@@ -27,11 +27,24 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        // await client.connect();
+        await client.connect();
+        // collections 
         const problemCollection = client.db('cardioCare').collection('cardioProblems');
         const appointmentCollection = client.db('cardioCare').collection('appointments');
         const doctorCollection = client.db('cardioCare').collection('doctors');
-        // doctors data
+        const userCollection = client.db('cardioCare').collection('users');
+        // users api secret and admin only
+        app.post('/users', async(req, res)=>{
+            const user = req.body;
+            const query = {email: user.email};
+            const existingUser = await userCollection.findOne(query);
+            if (existingUser) {
+                return res.send({message: 'user already exists!'})
+            }
+            const result = await userCollection.insertOne(user);
+            res.send(result);
+        })
+        // doctors api
         app.post('/doctors', async(req, res)=>{
             const doctor = req.body;
             console.log(doctor);
